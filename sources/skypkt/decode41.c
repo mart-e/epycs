@@ -192,7 +192,7 @@ int print_structure_one(char *str, char *selfptr, int index){
 		tmp=0;
 		if ((size-i)<4) {
 			memcpy(&tmp,buf,size-i);
-			if (index!=-1) tmp=bswap32my(tmp);
+			if (index!=-1) tmp=bswap32(tmp);
 			if ((size-i)==3){
 				printf("%06X ",tmp&0xffffff00);
 			};
@@ -205,7 +205,7 @@ int print_structure_one(char *str, char *selfptr, int index){
 
 		}else{
 			memcpy(&tmp,buf,4);
-			if (index!=-1) tmp=bswap32my(tmp);
+			if (index!=-1) tmp=bswap32(tmp);
 			printf("%08X ",tmp);		
 		};
 		j++;
@@ -310,7 +310,7 @@ int print_buffer2(char *str,unsigned int size1, char *selfptr){
 		tmp=0;
 		if ((size-i)<4) {
 			memcpy(&tmp,buf,size-i);
-			tmp=bswap32my(tmp);
+			tmp=bswap32(tmp);
 			if ((size-i)==3){
 				printf("%06X ",tmp&0xffffff00);
 			};
@@ -323,7 +323,7 @@ int print_buffer2(char *str,unsigned int size1, char *selfptr){
 
 		}else{
 			memcpy(&tmp,buf,4);
-			tmp=bswap32my(tmp);
+			tmp=bswap32(tmp);
 			printf("%08X ",tmp);		
 		};
 		j++;

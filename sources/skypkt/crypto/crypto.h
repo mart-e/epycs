@@ -316,7 +316,10 @@ static __forceinline BITCOUNT_TYPE __cdecl bit_count (BITCOUNT_TYPE n)
 			pthread_t thread;
 			return pthread_create (&thread, 0, func, arg);
 		}
-		
+
+		/* for gcc on mac osx */
+		static __forceinline u32 _lrotl (u32 x, u32 r) { return (x << r) | (x >> (32-r)); }
+		static __forceinline u32 _lrotr (u32 x, u32 r) { return (x >> r) | (x << (32-r)); }
 	#else
 		EXTERN u64			clock_counter (void);
 		#include <stdint.h>
