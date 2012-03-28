@@ -16,7 +16,10 @@ int DEBUG=0;
 
 
 int mysub_SessionManager_CMD_RECV_Process_00788E80(char *buf1, uint buflen1, char *selfptr);
+
 int mysub_call_on_reply_check_possible_Flush_decode_pkt_header_decode_fail(uint, uint, uint, uint ,uint, char *selfptr);
+//  mysub_41_check_42_in_Flush_decode_pkt_header_decode_fail
+
 int unpack_7_bit_encoded_to_dword(uint var1,uint var2,uint var3, char *selfptr);
 int mysub_local_realloc_alloc_getlast_err_exception(unsigned int var1,unsigned int var2, char *selfptr);
 int copy_memory1(unsigned int var1,unsigned int var2,unsigned int var3, char *selfptr);
@@ -31,7 +34,7 @@ int print_buffer2(char *str,unsigned int size, char *selfptr);
 int mygen_no_call_00927FF0(uint eax,uint ecx,uint edx,uint *eax11,uint *ecx11,uint *edx11, char *selfptr);
 
 int mysub_some_vars_set_math_009278B0(int var1, u8 var2, int var3, char *selfptr);
-int mysub_local_alloc_memerr_exception_00714790(uint var1);
+//int mysub_local_alloc_memerr_exception_00714790(uint var1, char *selfptr);
 
 
 //
@@ -189,7 +192,7 @@ int print_structure_one(char *str, char *selfptr, int index){
 		tmp=0;
 		if ((size-i)<4) {
 			memcpy(&tmp,buf,size-i);
-			if (index!=-1) tmp=bswap32(tmp);
+			if (index!=-1) tmp=bswap32my(tmp);
 			if ((size-i)==3){
 				printf("%06X ",tmp&0xffffff00);
 			};
@@ -202,7 +205,7 @@ int print_structure_one(char *str, char *selfptr, int index){
 
 		}else{
 			memcpy(&tmp,buf,4);
-			if (index!=-1) tmp=bswap32(tmp);
+			if (index!=-1) tmp=bswap32my(tmp);
 			printf("%08X ",tmp);		
 		};
 		j++;
@@ -307,7 +310,7 @@ int print_buffer2(char *str,unsigned int size1, char *selfptr){
 		tmp=0;
 		if ((size-i)<4) {
 			memcpy(&tmp,buf,size-i);
-			tmp=bswap32(tmp);
+			tmp=bswap32my(tmp);
 			if ((size-i)==3){
 				printf("%06X ",tmp&0xffffff00);
 			};
@@ -320,7 +323,7 @@ int print_buffer2(char *str,unsigned int size1, char *selfptr){
 
 		}else{
 			memcpy(&tmp,buf,4);
-			tmp=bswap32(tmp);
+			tmp=bswap32my(tmp);
 			printf("%08X ",tmp);		
 		};
 		j++;
@@ -342,28 +345,33 @@ int print_buffer2(char *str,unsigned int size1, char *selfptr){
 // called from external
 // unpack41
 //
+// -1 error
+// -2 not all bytes decoded
+//  1 success
 int unpack41_structure(char *buf, uint buflen, char *selfptr){
-	int ret;
+	int eax;
 	struct self_s *self;
 	self=(struct self_s *)selfptr;
+
 	
 	self->value_02c3f818=(unsigned int)buf;
 	self->value_02c3f844=buflen;
-	ret=mysub_SessionManager_CMD_RECV_Process_00788E80(buf,buflen,selfptr);
+	eax=mysub_SessionManager_CMD_RECV_Process_00788E80(buf,buflen,selfptr);
 	
-	if (ret==-2){
-		return -2;
+	if (eax==0) {
+		if (DEBUG) printf("decode failed\n");
+		return -1;
 	};
 
 	//last 2 bytes -- crc16
 	if (self->value_02c3f844!=2) {
 
 		//not all bytes decoded
-		return -1;
+		return -2;
 	};
 
 
-	return 0;
+	return 1;
 }
 
 
@@ -483,8 +491,9 @@ do {
 	//cmp edi,20
 	// ja jmp_vihod
 	if (edi > 0x20) {
-		printf("slishkom dohuya ciklov(>4) pri obrabotke int, jump on exit2, hz kuda\n");
-		exit(-1);
+		if (DEBUG) printf("slishkom dohuya ciklov(>4) pri obrabotke int, jump on exit2, hz kuda\n");
+		//exit(-1);
+		return 0;
 	};
 
 
@@ -559,8 +568,9 @@ do {
 
 
 	if (eax==0){
-		printf("buflen==0, obrabotali ves pkt, na vihod, hz kuda\n");
-		exit(-1);// hz
+		if (DEBUG) printf("buflen==0, obrabotali ves pkt, na vihod, hz kuda\n");
+		//exit(-1);// hz
+		return 0;
 	};
 
 
@@ -581,8 +591,9 @@ do {
 	//cmp edi,20
 	// ja jmp_vihod
 	if (edi > 0x20) {
-		printf("slishkom doohuya(>4) ciklov, pri obrabotke int, jump on exit3\n");
-		exit(-1);
+		if (DEBUG) printf("slishkom doohuya(>4) ciklov, pri obrabotke int, jump on exit3\n");
+		//exit(-1);
+		return 0;
 	};
 
 
@@ -658,8 +669,9 @@ do {
 
 
 	if (eax==0){
-		printf("buflen==0, obrabotali ves pkt, na vihod, hz kuda\n");
-		exit(-1);// hz
+		if (DEBUG) printf("buflen==0, obrabotali ves pkt, na vihod, hz kuda\n");
+		//exit(-1);// hz
+		return 0;
 	};
 
 
@@ -671,8 +683,9 @@ do {
 	//cmp ebx,edi//ebx=6d//edi=0
 	// if session cmd num = 0 ... oshibochka...
 	if (ebx==edi) {
-		printf("session cmd num = 0 , oshibochka, jump on hzkuda1\n");
-		exit(-1);
+		if (DEBUG) printf("session cmd num = 0 , oshibochka, jump on hzkuda1\n");
+		//exit(-1);
+		return 0;
 	};
 
 	//mov esi,[ebp+14]
@@ -727,8 +740,9 @@ do {
 	//cmp [ebp+8],edi//edi=0//ebp_8=0x09
 	//ebp_8=0x09 chto eto.. hmm, odin iz parametrov dlya funkcii maybe..
 	if (ebp_8==edi){
-		printf("hmm, odin iz parametrov in this func call maybe,jump on hzkuda3\n");
-		exit(-1);
+		if (DEBUG) printf("hmm, odin iz parametrov in this func call maybe,jump on hzkuda3\n");
+		//exit(-1);
+		return 0;
 	};
 
 
@@ -801,9 +815,9 @@ do {
 	//if al!=0 jmp 007891c2
 	//prigaem
 	if (eax==0) {
-		printf("Flush_decode.. call fail with ret=0, jump on hzkuda4\n");
+		if (DEBUG) printf("Flush_decode.. call fail with ret=0, jump on hzkuda4\n");
 		//exit(-1);
-		return -2;
+		return eax;
 	};
 
 
@@ -812,8 +826,9 @@ do {
 	//ne prigaem
 	//self->value_02c3f844 < 2 //
 	if (ebp_1c < 2) {
-		printf("rest of len <2, no CRC at end of stream, jump on hzkuda5\n");
-		exit(-1);
+		if (DEBUG) printf("rest of len <2, no CRC at end of stream, jump on hzkuda5\n");
+		//exit(-1);
+		return 0;
 	};
 
 	//edi=0
@@ -874,7 +889,7 @@ do {
 
 	if (DEBUG) printf("LEAVE mysub_SessionManager_CMD_RECV_Process_00788E80\n");
 
-	return 0;
+	return 1;
 };
 
 
@@ -911,7 +926,7 @@ int mysub_call_on_reply_check_possible_Flush_decode_pkt_header_decode_fail(uint 
 			char *buf_ebp;
 			unsigned int esp_14,esp_10,esp_18,esp_1c,esp_55c,esp_56c,esp_570,esp_578;
 			unsigned int esi_4,esi_8,ecx1;
-
+			int ret;
 			
 	struct self_s *self;
 	self=(struct self_s *)selfptr;
@@ -944,9 +959,10 @@ int mysub_call_on_reply_check_possible_Flush_decode_pkt_header_decode_fail(uint 
 	//cmp [ebp],41
 
 	if (buf_ebp[0]!=0x41){
-		printf("NOT 41 ENCODING !!! Maybe 42 ?\n");
-		printf("jump on hzkuda6\n");
-		exit(-1);
+		if (DEBUG) printf("NOT 41 ENCODING !!! Maybe 42 ?\n");
+		if (DEBUG) printf("jump on hzkuda6\n");
+		//exit(-1);
+		return 0;
 	};
 
 //00723e13:
@@ -998,8 +1014,8 @@ int mysub_call_on_reply_check_possible_Flush_decode_pkt_header_decode_fail(uint 
 
 	//test al,al
 	if (eax==0){
-		printf("first int decode error,hz kuda 7\n");
-		exit(-1);
+		if (DEBUG) printf("first int decode error,hz kuda 7\n");
+		return eax;
 	};
 
 //00723e35:
@@ -1022,8 +1038,7 @@ int mysub_call_on_reply_check_possible_Flush_decode_pkt_header_decode_fail(uint 
 	//test eax,eax
 	//if eax<=0 jmp ..
 	if (eax<=0){
-		printf("first int <=0, guess is a error.., hz kuda 8\n");
-		//exit(-1);
+		if (DEBUG) printf("first int <=0, guess is a error.., hz kuda 8\n");
 		return 0;
 	};
 
@@ -1074,8 +1089,8 @@ do {
 	//if eax=14 jmp ..
 	//ne prigaem
 	if (eax==0x14) {
-		printf("esli tochno 0x14 bytes ostalos v novom buffere, to buffer konchilsya..jmp hz kuda 9");
-		exit(-1);
+		if (DEBUG) printf("esli tochno 0x14 bytes ostalos v novom buffere, to buffer konchilsya..jmp hz kuda 9");
+		return 0;
 	};
 
 
@@ -1150,7 +1165,10 @@ do {
 		//call 00714800
 		//push ecx  --size
 		//push esi  -- ptr//self->value_02c3f7fc
-		mysub_local_realloc_alloc_getlast_err_exception(esi,ecx,selfptr);
+		ret=mysub_local_realloc_alloc_getlast_err_exception(esi,ecx,selfptr);
+		if (ret==-1){
+			return 0;
+		};
 		//02c3f7fc -- saved ptr on allocated buffer
       
 		esi=self->value_02c3f7fc;
@@ -1283,7 +1301,10 @@ do {
 	//( copy_memory(allocbuf+50,allocbuf+3c,0) )
 
 	//printf("eax=%X,ecx=%X, diff=%X, heap_alloc_buf=%X\n",eax,ecx,eax-ecx,self->value_02c3f7fc);
-	copy_memory1(eax,ecx,0,selfptr);
+	ret=copy_memory1(eax,ecx,0,selfptr);
+	if (ret==-1){
+		return 0;
+	};
 	//che delaet neponyatno poka..skoree vsego nichego
 
 
@@ -1323,7 +1344,10 @@ do {
 	//printf("ed7_:0x%08X\n",ecx);
 
 	//mysub_no_call_00724060
-	mysub_no_call_00724060(0,0,0,0,ecx,selfptr);
+	ret=mysub_no_call_00724060(0,0,0,0,ecx,selfptr);
+	if (ret==-1){
+		return 0;
+	};
 
 	//mov edx, [esi] //edx=02e32ee8 =alloc buf
 	//esi=self->value_02c3f7fc;
@@ -1365,7 +1389,10 @@ do {
 	//printf("edx=%X,ecx=%X\n",edx,ecx);
 	//edx,self->value_02c3ed70,0x14
 	//copy_memory2(edx,ecx,0x14);
-	copy_memory2(edx,ecx,0x14,selfptr);
+	ret=copy_memory2(edx,ecx,0x14,selfptr);
+	if (ret==-1){
+		return 0;
+	};
 
 
 	//esi=02c3f7fc
@@ -1398,8 +1425,10 @@ do {
 	//call 007242f0
 	//(mysub_call_eax__free)
 	//(mysub_call_eax__free)
-	mysub_call_eax__free(ecx,selfptr);
-
+	ret=mysub_call_eax__free(ecx,selfptr);
+	if (ret==-1) {
+		return 0;
+	};
 
 	//mov eax,[esp+578] //eax=8
 	esp_578=var4;//8;
@@ -1448,8 +1477,8 @@ do {
 	//if al == 0 jmp 
 	//ne prigaem..
 	if (eax==0) {
-			printf("error code 0 returned after mysub_unpack_7_bit_encoded, hz 21\n");
-			exit(-1);
+			if (DEBUG) printf("error code 0 returned after mysub_unpack_7_bit_encoded, hz 21\n");
+			return eax;
 	};
 
 	//mov eax , [esp+10 ] //eax=0
@@ -1559,7 +1588,7 @@ while (eax < ecx);
 //push ecx // 02c3f844//counter
 //push edx // 02c3f818//buffer
 int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5, char *selfptr){
-
+		int ret;
 		unsigned int ebx,eax,ecx,esi,ebp,edi,edx;
 		unsigned int esp_c,esp_14/*,esp_20*/;
 		unsigned char *edx_buf;
@@ -1626,8 +1655,9 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 	//je ..
 	//ne pprigaem
 	if (eax==0){
-		printf("buffer konchilsya ranshe vremeni buflen=0, hz 22\n");
-		exit(-1);
+		if (DEBUG) printf("buffer konchilsya ranshe vremeni buflen=0, hz 22\n");
+		//exit(-1);
+		return eax;
 	};
 
 
@@ -1734,8 +1764,9 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 	//ne prigaem
 
 	if (eax==0){
-		printf("unpack_7_bit_encoded_to_dword___2 returned with error , hz 24\n");
-		exit(-1);
+		if (DEBUG) printf("unpack_7_bit_encoded_to_dword___2 returned with error , hz 24\n");
+		//exit(-1);
+		return eax;
 	};
 
 	//mov eax, [esi]  //esi=alloc=02e32ee8//self->value_02c3f7fc
@@ -1840,6 +1871,13 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 
 			eax11=eax;
 			edx11=edx;
+
+			//printf("eax=0x%08X\n",eax);
+			//printf("edx=0x%08X\n",edx);
+
+			// optimizing feature ??
+			edx11=0;
+			/*
 			__asm {
 				mov eax,eax11;
 				mov edx,edx11;
@@ -1847,11 +1885,15 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 				mov eax11,eax;
 				mov edx11,edx;
 			};
+			*/
+			
 			eax=eax11;
 			edx=edx11;
 
-			//printf("ecx=0x%08X\n",ecx);
+			//printf("eax=0x%08X\n",eax);
 			//printf("edx=0x%08X\n",edx);
+	
+			if (DEBUG) printf("\n\n",edx);
 
 			//CALL Skype14.00927FF0
 			mygen_no_call_00927FF0(eax,ecx,edx,&eax11,&ecx11,&edx11,selfptr);
@@ -1949,8 +1991,9 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 		//prigaem
 		//007247A0:
 		if (eax == 2){
-			printf("perviy int = 2, hz 27\n");
-			exit(-1);
+			if (DEBUG) printf("perviy int = 2, hz 27\n");
+			//exit(-1);
+			return 0;
 		};
 
 		//cmp eax,3
@@ -1995,8 +2038,9 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 			//JE Skype14.007246F9
 			// if eax == 0 ...
 			if (eax==ebp){
-				printf("size 0, when processing first int = 3\n");
-				exit(-1);
+				if (DEBUG) printf("size 0, when processing first int = 3\n");
+				//exit(-1);
+				return 0;
 			};
 
 			//MOV ECX,DWORD PTR DS:[EDI]
@@ -2034,8 +2078,9 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 			//eax ostalos buffera
 			//ecx skoka nado buffera + 1
 			if (eax<ecx) {
-				printf("buffer menshe chem nada dlya obekta, first int = 3\n");
-				exit(-1);
+				if (DEBUG) printf("buffer menshe chem nada dlya obekta, first int = 3\n");
+				//exit(-1);
+				return 0;
 			};
 
 			//SUB EAX,ECX
@@ -2059,6 +2104,11 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 			//funkciya dlya malloc-a
 			eax=mysub_local_alloc_memerr_exception(ecx,selfptr);
 
+			if (eax==0){
+				// error allocate
+				return 0;
+			};
+
 			//MOV EDX,DWORD PTR DS:[ESI+10]
 			// dostaem 5 integer
 			memcpy(&edx,(char *)esi+0x10,4);
@@ -2078,7 +2128,10 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 			//PUSH ECX//src, otkuda kopi
 			//PUSH EAX//dst,kuda kopi
 			//CALL Skype14.00927000
-			copy_memory2(eax,ecx,edx,selfptr);
+			ret=copy_memory2(eax,ecx,edx,selfptr);
+			if (ret==-1){
+				return 0;
+			};
 
 			//print_buffer2("3.3_3:",0x20,selfptr);
 
@@ -2133,12 +2186,176 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 			return eax;
 		};
 
+
+
+		//cmp eax,5
+		//jnz 007248D9
+		//prigaem
+		//00724880:
+		if (eax == 5){
+			//printf("perviy int = 5, hz 281\n");
+			
+			//MOV EBP,DWORD PTR SS:[ESP+20]
+			//MOV EAX,DWORD PTR SS:[EBP]
+			//; EAX=0004AF12
+			ebp=self->value_02c3f83c;
+			eax=self->value_02c3f83c;
+
+			//CMP EAX,10
+			//JB Skype14.007246F9
+			if (eax < 0x10) {
+				if (DEBUG) printf("len too small\n");
+				eax=0;
+				return eax;
+			};
+
+			//ADD EAX,-10
+			//; EAX=0004AF02
+			eax=eax-0x10;
+
+			//PUSH 10
+
+			//MOV DWORD PTR SS:[EBP],EAX
+			self->value_02c3f83c=eax;
+
+			//CALL Skype14.00714790
+			//eax=mysub_local_alloc_memerr_exception_00714790(0x10, selfptr);
+			eax=mysub_local_alloc_memerr_exception(0x10,selfptr);
+
+			if (eax==0){
+				return 0;
+			};
+
+			//eax -- malloc-ed ptr, 0x10 size
+
+			ecx=0;
+			//XOR ECX,ECX                               
+			//; ECX=00000000
+			
+			//ADD ESP,4
+
+			//CMP EAX,ECX
+			//JE SHORT Skype14.007248BC
+			//if eax==0
+			if (eax==ecx){
+				
+				//XOR EAX,EAX
+				eax=0;
+
+			}else{
+
+				//ecx=0
+				//MOV DWORD PTR DS:[EAX+C],ECX
+				//MOV DWORD PTR DS:[EAX+8],ECX
+				//MOV DWORD PTR DS:[EAX+4],ECX
+				memset((char *)eax+4,0x00,12);
+
+
+				//MOV DWORD PTR DS:[EAX],Skype14.00953898
+				memcpy((char *)eax,"\x00\x95\x38\x98",4);
+
+				//offset on Skype14.00953898,  
+				//!!! call eax=1
+				// stranno
+				//007B78A2
+				//memcpy((char *)eax,"\x00\x7B\x78\xA2",4);
+
+
+			//JMP SHORT Skype14.007248BE
+			};
+
+			//007248BE:
+			//MOV EDX,DWORD PTR SS:[ESP+1C]
+			//edx=0x08
+			edx=var3;
+
+			//printf("edx=0x%08X\n",edx);
+			//printf("eax=0x%08X eax=0x%08X eax=0x%08X eax=0x%08X\n",(char *)eax,eax+0x4,eax+0x8,eax+0xc);
+			//exit(1);
+
+			//addr of self->value_02c3f83c
+			//PUSH EBP
+
+			//DEC EDX
+			edx--;
+
+			//MOV DWORD PTR DS:[ESI+C],EAX
+			//esi+0x0C -- 4 integer --
+			memcpy((char *)esi+0x0C,&eax,4);
+
+			//edx=0x07
+			//PUSH EDX
+
+			//ecx=0x00
+			//PUSH ECX
+
+			//vishe po kodu
+			//edi=self->value_02c3f818;
+			//ebx=self->value_02c3f844;
+			//Arg2 = 02C3EF1C
+			//Arg1 = 02C3EF20
+			// len
+			//ebx=self->value_02c3f844;
+			//PUSH EBX
+			// curr buf ptr
+			//edi=self->value_02c3f818;
+			//PUSH EDI
+			
+			//Arg1 = 02C3EF20; ECX=02DDEF90
+			//MOV ECX,EAX
+
+			// call
+			//push ebp//02c3f83c	//var5//new alloc buf max len = 0x04b000
+			//push edx//7			//var4
+			//push ecx//=0			//var3
+			//push ebx//02c3f844    //var2  len
+			//push edi//02c3f818    //var1  curr_buf_ptr
+			//call mysub_call_on_reply_check_possible_Flush_decode_pkt_header_decode_fail
+			//call mysub_41_check_42_in_Flush_decode_pkt_header_decode_fail
+			//CALL Skype14.00723CD0
+
+			//printf("edi=%X,ebx=%X,ecx=%X,edx=%X,ebp=%X\n",edi,ebx,ecx,edx,ebp);
+			//exit(1);
+
+			eax=mysub_call_on_reply_check_possible_Flush_decode_pkt_header_decode_fail(edi,ebx,ecx,edx,ebp,selfptr);
+
+
+			/*
+			*  Checking encoding marker(0x41)
+			*  Processing first int from stream, and save it in global var
+			*     Cikl, postepennoe videlenie pamyati, sohr v 02c3f7fc, na pervom shage i na 20-om..
+			*        zanulenie buffer-a 02c3ed70 razmerom 16 byte
+			*        skopiruem 0x14 byte(00 00..) iz 02c3ed70 v heap_alloc_buf..
+			*        check on memory corrupt, by calling mysub_call_eax__free
+			*        vizov mysub_unpack_7_bit_encoded
+			*     Ciklov stoka je skoka perviy dekodirovanniy int
+			*  Vihod
+			*/
+
+///////////////////////////////////////////
+
+			// pop     edi
+			// pop     esi
+			// pop     ebp
+			// pop     ebx
+			// retn    10h
+
+
+			return eax;
+
+
+		};
+
+
+
+
 		//cmp eax,4
 		//jnz 00724880
 		//ne prigaem
 		if (eax != 4){
-			printf("perviy int != 4, hz 29\n");
-			exit(-1);
+			if (DEBUG) printf("perviy int != 4 (new unknown case), hz 29, eax=0x%08X\n",eax);
+			//exit(-1);
+			return 0;
 		};
 		//eax==4
 
@@ -2169,8 +2386,9 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 		//je jmp ..
 		//ne prigaem
 		if (eax==0){
-			printf("unpack_7_bit_encoded_to_dword___2, return err, hz 30\n");
-			exit(-1);
+			if (DEBUG) printf("unpack_7_bit_encoded_to_dword___2, return err, hz 30\n");
+			//exit(-1);
+			return eax;
 		};
 
 
@@ -2193,8 +2411,9 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 		//if eax<ecx
 		//ne prigaem
 		if (eax<ecx){
-			printf("if ostatok buflen < readed 5 int bytes(0x36<0x31),len sanity check from pkt, err, hz 31\n");
-			exit(-1);
+			if (DEBUG) printf("if ostatok buflen < readed 5 int bytes(0x36<0x31),len sanity check from pkt, err, hz 31\n");
+			//exit(-1);
+			return 0;
 		};
 
 		//mov edx, [esp+20]
@@ -2214,8 +2433,9 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 		//if eax<ecx jmp
 		//ne prigaem
 		if (eax<ecx){
-			printf("if buf max len left < readed from pkt, len check, err,hz 32\n");
-			exit(-1);
+			if (DEBUG) printf("if buf max len left < readed from pkt, len check, err,hz 32\n");
+			//exit(-1);
+			return 0;
 		};
 
 		//sub eax,ecx //eax=0004afc4//ecx=31
@@ -2240,6 +2460,10 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 		//push ecx//31
 		eax=mysub_local_alloc_memerr_exception(ecx,selfptr); //heap_alloc_struct alloc
 	
+		if (eax==0){
+			// error alloc
+			return 0;
+		};
 		//mov edx,[ebp] //edx=31
 		//edx=ebp;
 		memcpy(&edx,(char *)ebp,4); //dobivaem znachenie 5 int
@@ -2260,7 +2484,10 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 		//push ecx //ecx=02c3f3fb --curr buf ptr//self->value_02c3f818
 		//push eax //eax=02e2d438 --alloc2//self->value_02e2d438;
 		//copy_memory2(alloc2,pkt_buf+0x13,0x31);
-		copy_memory2(eax,ecx,edx,selfptr);
+		ret=copy_memory2(eax,ecx,edx,selfptr);
+		if (ret==-1){
+			return 0;
+		};
 		//skopirovali 0x31 v alloc2
 		//eax=02e2d438
 		//esi=02e32f10
@@ -2361,8 +2588,9 @@ int mysub_unpack_7_bit_encoded(uint var1,uint var2,uint var3,uint var4,uint var5
 	//if al != 0 jmp
 	//prigaem
 	if (eax==0){
-			printf("unpack_7_bit_encoded_to_dword___2, return error,hz 32\n");
-			exit(-1);
+			if (DEBUG) printf("unpack_7_bit_encoded_to_dword___2, return error,hz 32\n");
+			//exit(-1);
+			return eax;
 	};
 
 
@@ -2411,7 +2639,7 @@ int __mysub_some_vars_set_math_009278B0(uint var1, uint var2, uint var3,char *se
 	struct self_s *self;
 	self=(struct self_s *)selfptr;
 
-	printf("ENTER mysub_some_vars_set_math_009278B0\n");
+	if (DEBUG) printf("ENTER mysub_some_vars_set_math_009278B0\n");
 
 	//MOV EAX,DWORD PTR SS:[ESP+C]
 	esp_c=var3;
@@ -2425,7 +2653,7 @@ int __mysub_some_vars_set_math_009278B0(uint var1, uint var2, uint var3,char *se
 
 
 
-	printf("LEAVE mysub_some_vars_set_math_009278B0\n");
+	if (DEBUG) printf("LEAVE mysub_some_vars_set_math_009278B0\n");
 
 	return 0;
 };
@@ -2558,8 +2786,9 @@ int mysub_local_alloc_memerr_exception(unsigned int var1, char *selfptr){
 
 	//sanity check
 	if (self->heap_alloc_struct_count>=100){
-		printf("more then 100 alloc ptrs (strings) found\n");
-		exit(-1);
+		if (DEBUG) printf("more then 100 alloc ptrs (strings) found\n");
+		//exit(-1);
+		return 0;
 	};
 
 	//test eax,eax
@@ -2568,8 +2797,9 @@ int mysub_local_alloc_memerr_exception(unsigned int var1, char *selfptr){
 	//prigaem
 
 	if (eax==0){
-		printf("mem alloc err2 in mysub_local_alloc_memerr_exception, hz hz\n");
-		exit(-1);
+		if (DEBUG) printf("mem alloc err2 in mysub_local_alloc_memerr_exception, hz hz\n");
+		//exit(-1);
+		return eax;
 	};
 
 	//add esp,8
@@ -2672,8 +2902,9 @@ int unpack_7_bit_encoded_to_dword___2(unsigned int var1,unsigned int var2,unsign
 	//if eax = 0 jmp ..
 	//ne prigaem
 	if (eax==0){
-		printf("buflen=0, error, hz 23\n");
-		exit(-1);
+		if (DEBUG) printf("buflen=0, error, hz 23\n");
+		//exit(-1);
+		return eax;
 	};
 
 	//lea ecx, [eax-1]
@@ -2878,31 +3109,35 @@ int mysub_call_eax__free(uint var1, char *selfptr){
 	//cmp eax,3
 	//if eax==3 jmp ..
 	if (eax==3){
-		printf("memcorrupt, must be 0, hz 16\n");
-		exit(-1);
+		if (DEBUG) printf("memcorrupt, must be 0, hz 16\n");
+		//exit(-1);
+		return -1;
 	};
 
 	//cmp eax,4
 	//if eax==4 jmp ..
 	if (eax==4){
-		printf("memcorrupt, must be 0,hz 17\n");
-		exit(-1);
+		if (DEBUG) printf("memcorrupt, must be 0,hz 17\n");
+		//exit(-1);
+		return -1;
 	};
 
 
 	//cmp eax,6
 	//if eax==6 jmp ..
 	if (eax==6){
-		printf("memcorrupt, must be 0,hz 18\n");
-		exit(-1);
+		if (DEBUG) printf("memcorrupt, must be 0,hz 18\n");
+		//exit(-1);
+		return -1;
 	};
 
 	//cmp eax,5
 	//if eax!=5 jmp 
 	//prigaem na vihod normalniy
 	if (eax==5){
-		printf("memcorrupt, must be 0,hz 19\n");
-		exit(-1);
+		if (DEBUG) printf("memcorrupt, must be 0,hz 19\n");
+		//exit(-1);
+		return -1;
 	};
 
 	//ret
@@ -2987,8 +3222,9 @@ int mysub_no_call_00724060(uint var1,uint var2,uint var3,uint var4,uint var5, ch
 	//if eax!=0   .. jmp
 	//ne prigaem
 	if (eax!=0){
-		printf("var3 !=0, hz 14\n");
-		exit(-1);
+		if (DEBUG) printf("var3 !=0, hz 14\n");
+		//exit(-1);
+		return -1;
 	};
 
 	//mov edx, [esp+10]  //edx=0
@@ -3103,8 +3339,9 @@ int copy_memory2(unsigned int var1,unsigned int var2,unsigned int var3, char *se
 	//if edi !=3  jmp
 	//ne prigaem
 	if (edi==3){
-		printf("allocated ptr on buffer = 3, error, hz 16\n");
-		exit(-1);
+		if (DEBUG) printf("allocated ptr on buffer = 3, error, hz 16\n");
+		//exit(-1);
+		return -1;
 	};
 
 
@@ -3314,8 +3551,9 @@ int copy_memory1(unsigned int var1,unsigned int var2,unsigned int var3, char *se
 	//if edi <= esi jmp..
 
 	if (edi<=esi) {
-		printf("ptr var1 menshe ptr var2.. hz 10\n");
-		exit(-1);
+		if (DEBUG) printf("ptr var1 menshe ptr var2.. hz 10\n");
+		//exit(-1);
+		return -1;
 	};
 	//ne prigaem
 
@@ -3324,16 +3562,18 @@ int copy_memory1(unsigned int var1,unsigned int var2,unsigned int var3, char *se
 	//if edi < eax jmp ..
 	//ne prigaem
 	if (edi<=eax) { 	//negative ptr
-			printf("ptr var1 menshe ptr var2 with offset.., hz 11\n");
-			exit(-1);
+			if (DEBUG) printf("ptr var1 menshe ptr var2 with offset.., hz 11\n");
+			//exit(-1);
+			return -1;
 	};
 	
 	//test edi,3
 	//if edi !=3  jmp
 	//ne prigaem
 	if (edi == 3){
-		printf("ptr1==3 ? , hz 12\n");
-		exit(-1);
+		if (DEBUG) printf("ptr1==3 ? , hz 12\n");
+		//exit(-1);
+		return -1;
 	};
 
 	//shr ecx,2 --ecx=0
@@ -3349,8 +3589,9 @@ int copy_memory1(unsigned int var1,unsigned int var2,unsigned int var3, char *se
 	//prigaem
 	//ecx=0
 	if (ecx >= 8){
-		printf("ecx>8 , hz 13\n");
-		exit(-1);
+		if (DEBUG) printf("ecx>8 , hz 13\n");
+		//exit(-1);
+		return -1;
 	};
 
 	//jmp [ecx*4+009270dc]  // jmp 0092713f
@@ -3412,8 +3653,9 @@ int mysub_local_realloc_alloc_getlast_err_exception(unsigned int var1,unsigned i
 	//if eax=0 jmp ..
 	//prigaem:
 	if (eax!=0){
-		printf("esli znachenie ptr ne 0, znachit on uje init-ze a eto err, hz kuda 10\n");
-		exit(-1);
+		if (DEBUG) printf("esli znachenie ptr ne 0, znachit on uje init-ze a eto err, hz kuda 10\n");
+		//exit(-1);
+		return -1;
 	};
 
 
@@ -3443,8 +3685,9 @@ int mysub_local_realloc_alloc_getlast_err_exception(unsigned int var1,unsigned i
 	//test eax,eax 
 	//if eax = 0 jmp .. getlasterror
 	if (eax=0) {
-		printf("memory alloc error,ptr null after malloc, jmp on getlast error\n");
-		exit(-1);
+		if (DEBUG) printf("memory alloc error,ptr null after malloc, jmp on getlast error\n");
+		//exit(-1);
+		return -1;
 	};
 
 	//add esp,8
@@ -3514,8 +3757,8 @@ int unpack_7_bit_encoded_to_dword(uint var1,uint var2,uint var3, char *selfptr){
 	
 	//test eax,eax
 	if (eax==0){
-			printf("konchilsya buffer,smth like terra nova here, jmp hz kuda\n");
-			exit(-1);
+			if (DEBUG) printf("konchilsya buffer,smth like terra nova here, jmp hz kuda\n");
+			return eax;
 	};
 
 
@@ -3668,6 +3911,15 @@ int mygen_no_call_00927FF0(uint eax,uint ecx,uint edx,uint *eax11,uint *ecx11,ui
 	eax1=eax;
 	ecx1=ecx;
 	//shld    edx, eax, cl
+	
+	//???
+
+	if (DEBUG) printf("eax=0x%08X\n",eax);
+	if (DEBUG) printf("edx=0x%08X\n",edx);
+
+	edx=eax << ecx;
+
+	/*
 	__asm { 
 		mov edx, edx1;
 		mov eax, eax1;
@@ -3677,9 +3929,15 @@ int mygen_no_call_00927FF0(uint eax,uint ecx,uint edx,uint *eax11,uint *ecx11,ui
 		mov eax1, eax;
 		mov ecx1, ecx;
 	};
+	*/
+
 	edx=edx1;
 	eax=eax1;
 	ecx=ecx1;
+
+	if (DEBUG) printf("eax=0x%08X\n",eax);
+	if (DEBUG) printf("edx=0x%08X\n",edx);
+	if (DEBUG) printf("\n\n",edx);
 
 	//shl     eax, cl
 	eax=eax << ecx;
