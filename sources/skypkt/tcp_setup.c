@@ -799,14 +799,6 @@ unsigned int make_tcp_client_sess1_pkt1(char *ip,unsigned short port,unsigned in
 
 	// Check decoded data
 
-	// Check, if answer was correct
-	// and rc4 initilization completed
-	if (memcmp(recvbuf+2,send_pkt+2,8)!=0){
-		printf("RC4 tcp flow handshake failed\n");
-		exit(1);
-	};
-
-
 	//14-...
 
 
@@ -875,7 +867,6 @@ unsigned int make_tcp_client_sess1_pkt2(char *ip,unsigned short port,unsigned in
 	memset(buf1,0,sizeof(buf1));
   	buf1_len=encode41_setup1pkt(buf1, sizeof(buf1));
 	show_memory(buf1, buf1_len, "setup1pkt");
-
 
 	// aes encrypt block 1
 	blkseq=0x00;
