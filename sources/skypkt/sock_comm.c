@@ -5,7 +5,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef _WINDOWS_
 #include <winsock.h>  
+#else
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#define closesocket(x) ({})
+#endif
 
 int sock;
 int connected=0;
@@ -14,11 +21,21 @@ int connected=0;
 // sockets related                            //
 ////////////////////////////////////////////////
 
+int start_wsa() {
+	#ifdef _WINDOWS_ 
+	WSADATA wsaDATA;
+	if (WSAStartup(MAKEWORD(2,0),&wsaDATA)!=0){
+		printf("WSAStartup error. Error: %d\n",WSAGetLastError());
+	};
+	#endif
+	return 0;
+
+}
+
 //unified udp communication, send buffer, and place retrived data into result.
 int udp_talk(char *remoteip, unsigned short remoteport, char *buf, int len, char *result){
 	int sock, ret, addrlen;
 	struct sockaddr_in addr;
-	WSADATA wsaDATA;
 	char tmpbuf[1024];
 	fd_set rfds;
 	struct timeval tv;
@@ -26,9 +43,7 @@ int udp_talk(char *remoteip, unsigned short remoteport, char *buf, int len, char
 	tv.tv_sec=5;
 	tv.tv_usec=0;
 
-	if (WSAStartup(MAKEWORD(2,0),&wsaDATA)!=0){
-		printf("WSAStartup error. Error: %d\n",WSAGetLastError());
-	};
+	start_wsa();
 
 	sock=socket(PF_INET,SOCK_DGRAM,IPPROTO_UDP);
 	if (sock==-1) {
@@ -80,7 +95,6 @@ int udp_talk(char *remoteip, unsigned short remoteport, char *buf, int len, char
 int tcp_talk(char *remoteip, unsigned short remoteport, char *buf, int len, char *result,int need_close) {
 	int ret;
 	struct sockaddr_in addr;
-	WSADATA wsaDATA;
 	char tmpbuf[0x10000];
 	int cnt=0;
 	int cnt2=0;
@@ -89,9 +103,7 @@ int tcp_talk(char *remoteip, unsigned short remoteport, char *buf, int len, char
 
 	if (connected==0) {
 
-		if (WSAStartup(MAKEWORD(2,0),&wsaDATA)!=0){
-			printf("WSAStartup error. Error: %d\n",WSAGetLastError());
-		};
+		start_wsa();
 
 		sock=socket(PF_INET,SOCK_STREAM,IPPROTO_TCP);
 		if (sock==-1) {
@@ -162,7 +174,6 @@ int tcp_talk(char *remoteip, unsigned short remoteport, char *buf, int len, char
 int tcp_talk_recv(char *remoteip, unsigned short remoteport, char *result, int need_close) {
 	int ret;
 	struct sockaddr_in addr;
-	WSADATA wsaDATA;
 	char tmpbuf[0x10000];
 	int cnt=0;
 	
@@ -170,9 +181,7 @@ int tcp_talk_recv(char *remoteip, unsigned short remoteport, char *result, int n
 
 	if (connected==0) {
 
-		if (WSAStartup(MAKEWORD(2,0),&wsaDATA)!=0){
-			printf("WSAStartup error. Error: %d\n",WSAGetLastError());
-		};
+		start_wsa();
 
 		sock=socket(PF_INET,SOCK_STREAM,IPPROTO_TCP);
 		if (sock==-1) {
