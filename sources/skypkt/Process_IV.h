@@ -4,14 +4,10 @@
 #include <stdlib.h>
 
 #include "crypto/crypto.h"
-/*
-#define u8				unsigned char
-#define u16				unsigned short
-#define u32				unsigned long
 
-#define rotl32(x, n)				_lrotl (x, n)	// using ROL x,n on Intel
-#define rotr32(x, n)				_lrotr (x, n)	// using ROR x,n on Intel
-*/
+#define u8  __uint8_t
+#define u16 __uint16_t
+#define u32 __uint32_t
 
 
 #pragma warning				(disable:4307)
