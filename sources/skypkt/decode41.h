@@ -2,6 +2,7 @@
 //
 
 #include <stdio.h>
+#include "crypto/crypto.h"
 
 
 #ifndef uint
@@ -14,10 +15,6 @@
 	#define u32 unsigned long
 #endif
 
-
-#define ROTR32(x, n)			((((u32) (x)) >> ((n) & 31)) | (((u32) (x)) << ((0-(n)) & 31)))
-#define ROTL32(x, n)			((((u32) (x)) << ((n) & 31)) | (((u32) (x)) >> ((0-(n)) & 31)))
-#define bswap32(x)				((ROTL32 ((u32) (x), 8) & 0x00FF00FFU) | (ROTR32 ((u32) (x), 8) & 0xFF00FF00U))
 
 extern int unpack41_structure(char *buf, unsigned int buflen, char *selfptr);
 extern int print_structure(char *str, char *selfptr, int detail);
