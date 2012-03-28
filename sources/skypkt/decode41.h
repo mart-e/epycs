@@ -25,7 +25,7 @@ struct blob_s {
 	uint obj_type;
 	uint obj_index;
 	uint obj_data;
-	uint data_ptr;
+	void *data_ptr;
 	uint data_size;
 };
 

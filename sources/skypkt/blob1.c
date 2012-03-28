@@ -66,7 +66,7 @@ int encode41_setup1pkt(char *buf, int buf_limit_len){
     blob.obj_type = 4;
 	blob.obj_index = 1;
     blob.obj_data = 0;
-	blob.data_ptr = (uint)INIT_UNK;
+	blob.data_ptr = (char*)INIT_UNK;
 	blob.data_size = sizeof(INIT_UNK)-1;
 
     buf_len=make_41encode(buf,buf_len,(char *)&blob, 0);
@@ -96,7 +96,7 @@ int encode41_setup1pkt(char *buf, int buf_limit_len){
 	blob.obj_type = 3;
 	blob.obj_index = 0;
     blob.obj_data = 0;
-	blob.data_ptr = (int)REMOTE_NAME;
+	blob.data_ptr = (char*)REMOTE_NAME;
 	blob.data_size = strlen(REMOTE_NAME)+1;
 
     buf_len=make_41encode(buf,buf_len,(char *)&blob, 0);
