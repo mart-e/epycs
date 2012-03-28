@@ -8,7 +8,6 @@
 #include <time.h>
 
 #include <fcntl.h>
-#include <io.h>
 
 #include "miracl.h"
 #include "short_types.h"

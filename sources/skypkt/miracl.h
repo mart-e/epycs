@@ -839,7 +839,7 @@ extern void  premult(_MIPT_ big,int,big);
 extern int   subdiv(_MIPT_ big,int,big);  
 extern BOOL  subdivisible(_MIPT_ big,int);
 extern int   remain(_MIPT_ big,int);   
-extern void  bytes_to_big(_MIPT_ int,char *,big);
+extern void  bytes_to_big(_MIPT_ int,const char *,big);
 extern int   big_to_bytes(_MIPT_ int,big,char *,BOOL);
 extern mr_small normalise(_MIPT_ big,big);
 extern void  multiply(_MIPT_ big,big,big);

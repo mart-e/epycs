@@ -23,8 +23,15 @@
                              * only version of MIRACL required    */
                             /* Number of bits per double mantissa */
 
-#define mr_dltype __int64   /* ... or long long for Unix/Linux */
+/* ... or long long for Unix/Linux */
+#ifdef __int64
+#define mr_dltype __int64 
 #define mr_unsign64 unsigned __int64
+#else
+#define mr_dltype long long
+#define mr_unsign64 unsigned long long
+#endif
+
 
 #define MAXBASE ((mr_small)1<<(MIRACL-1))
 

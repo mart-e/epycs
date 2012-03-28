@@ -206,6 +206,10 @@
 	
 #endif
 
+#ifndef __int64
+#define __int64 long long
+#endif
+
 //! \brief The most important union for optimal byte/word/dword/qword manipulations
 #ifndef _OCTET_
 #define _OCTET_
