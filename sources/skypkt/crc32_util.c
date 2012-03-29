@@ -159,7 +159,6 @@ unsigned int Calculate_CRC32(char *crc32, int bytes) {
 int Calculate_CRC32_For41(char *data, int len)
 {
   unsigned int eax; // eax@1
-  unsigned int edx; // edx@1
   unsigned int ebx;
   unsigned int esi;
   unsigned int edi;
@@ -168,7 +167,6 @@ int Calculate_CRC32_For41(char *data, int len)
   char *bin;
 
   eax=len;
-  edx = (unsigned int )data;
   esi=my_this;
 
   ecx=eax;//len
@@ -187,8 +185,7 @@ int Calculate_CRC32_For41(char *data, int len)
 	  
 	  //printf("\nNEW eax=0x%08X\n",eax);
 	  
-	  bin=(char *)edx;
-	  ebx=bin[0] & 0xff;
+	  ebx=data[0] & 0xff;
 
 	  //printf("ebx=0x%08X\n",ebx);
 
@@ -217,7 +214,7 @@ int Calculate_CRC32_For41(char *data, int len)
 
 	  //printf("eax=0x%08X\n",eax);
 
-	  edx=edx++;
+	  data++;
 	  edi--;
 	  esi=eax & 0xffff;
 

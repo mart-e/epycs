@@ -243,7 +243,7 @@ int process_aes(char *buf, int buf_len, int usekey, int blkseq, int need_xor){
 //in ida called
 //unpack_7_bit_encoded_to_dword
 int get_packet_size(char *data,int len){
-	unsigned int ebx, edi, esi, eax, ecx, ebp, edx;
+	unsigned int ebx, edi, esi, eax, ecx, edx;
 	char *buf_eax;
 
 
@@ -267,24 +267,16 @@ int get_packet_size(char *data,int len){
 	ecx=eax-1;
 	ebx=ecx;
     
-	//ptr on data buffer
-	ebp=(int )data;
-
 	do{
-		eax=ebp;
-
 		ecx=esi;
 
 		esi=esi+7;
 
-		buf_eax=(char *)eax;
-		edx=buf_eax[0] & 0xff;//ptr
+		edx=data[0] & 0xff;//ptr
 
 		//printf("readed byte edx=%X\n",edx);
 
-		eax++;
-
-		ebp=eax;
+		data++;
 
 		eax=edx;
 
